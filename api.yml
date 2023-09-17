@@ -1,0 +1,234 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: '3.0.0'
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost
+paths:
+  /auth/register:
+    post:
+      summary: This is just a test endpoint to get you started.
+      operationId: auth-register
+      requestBody:
+        description: Necessary data that need fills by user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Succesfully registered new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      summary: This is just a test endpoint to get you started.
+      operationId: auth-login
+      requestBody:
+        description: Necessary data that need fills by user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Succesfully registered new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/me:
+    get:
+      summary: This is just a test endpoint to get you started.
+      operationId: auth-me
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Succesfully registered new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '403':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update user data
+      operationId: auth-me-update
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Necessary data that need fills by user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeUpdateRequest'
+      responses:
+        '200':
+          description: Succesfully registered new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeUpdateResponse'
+        '403':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - phone
+        - fullname
+        - password
+      properties:
+        phone:
+          type: string
+        fullname:
+          type: string
+        password:
+          type: string
+    RegisterResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 15
+    LoginRequest:
+      type: object
+      required:
+        - phone
+        - password
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - token
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 15
+            token:
+              type: string
+              example: 'xxxxx.yyyyy.zzzzz'
+    MeResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - fullname
+            - phone
+          properties:
+            fullname:
+              type: string
+              example: 'David Lienardy'
+            phone:
+              type: string
+              example: 'xxxxx.yyyyy.zzzzz'
+    MeUpdateRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+        fullname:
+          type: string
+    MeUpdateResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+    ErrorResponse:
+      type: object
+      nullable: true
+      required:
+        - code
+        - type
+        - message
+      properties:
+        code:
+          type: integer
+          example: 803
+        type:
+          type: string
+          example: UnauthorizedError
+        message:
+          type: string
+          example: Username or password is wrong
+        fields:
+          type: object
+          nullable: false
+          additionalProperties:
+            type: string
+          example:
+            name: Name is required

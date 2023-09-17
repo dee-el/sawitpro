@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    ports:
+      - '8080:1323'
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5431/database?sslmode=disable
+      PRIVATE_CERT: "-----BEGIN PRIVATE KEY-----\nMIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAM1/UB+62CuKgCT4\nOs3qjsjZCUjIorHNG2IN5WmliNJJTuy1q5vDuoyX5lt2xE7yca9FBUCfE1t1luR8\n0lf1Peis/WRw4V9VAz1Jef7XXPHqdxWg8kHALBnr3ikLG1eWB1ZlKLvV/5BL22Lk\nCZ/VJeFzI9rswztVD4+0WK6+28jFAgMBAAECgYEAqcbSarSSnj56KpEO/EsalmOB\noSlqCR2czwEOFZ+Wj63TUAuz8SffOwLQZaaU/2icdiK++Smz828OME3T9ql97/+Q\n/ZrNJ+wCVndjfni2pds8UePsf+0i5U7TIy/XsSVbF+0ijmIFZA4TNo/Nyfqn+pVO\ngwQu0/KMoiYL1M9hGWECQQDvJw5UMSUsPms4JOUJXOSVIf6sxv1PSzXz9/bQDjqa\nQiaOBAQUA082THHdPI9WLvL6SEz/3Nw1ioc79Zpbg209AkEA2/lPFRsRcMfMCAJH\nwW2CI+Zbtmxy6iO1uYPo2MZPkFpI0U1QqPX9PUIsiJ4H5yqJeZhCM9Ssg8QB4YF4\n4bUSKQJAN8Miiyz+Xuea9ndb1CgNwFwx1rV7QO7ngKBTs0VuEqPT+48iKExxPtbq\nQcyqG01NKGCNW6dyzSUkzS1CNY5afQJBAMcabnklCfEx9rwdDEPI0e2amNKScKT6\n84ZaHgzv2p5HCffgaiy0kqW62sJBf9e9ybc0mF9/lTKi3Cz32qk5EpkCQQCTr9D5\nx7Cbij3HBkAfmr+4VU3VB3KjSVvtn+gJX/MvOSUaBzZjpE/xIMrSkt91OExwkU7b\nR9e9scQkaTZgiwBv\n-----END PRIVATE KEY-----"
+      PUBLIC_CERT: "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNf1AfutgrioAk+DrN6o7I2QlI\nyKKxzRtiDeVppYjSSU7staubw7qMl+ZbdsRO8nGvRQVAnxNbdZbkfNJX9T3orP1k\ncOFfVQM9SXn+11zx6ncVoPJBwCwZ694pCxtXlgdWZSi71f+QS9ti5Amf1SXhcyPa\n7MM7VQ+PtFiuvtvIxQIDAQAB\n-----END PUBLIC KEY-----"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    platform: linux/x86_64
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: database
+    ports:
+      - 5431:5432
+    expose:
+      - 5431
+    volumes:
+      - db:/var/lib/postgresql/data
+      # Load database schema from ./database.sql
+      # If you want to reload new database schema, you need to execute
+      # `docker-compose down --volumes` first to remove the volume.
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+volumes:
+  db:
+    driver: local
